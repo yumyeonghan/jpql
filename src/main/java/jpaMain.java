@@ -1,5 +1,6 @@
 import jpql.Member;
 import jpql.MemberDTO;
+import jpql.Team;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,11 +13,29 @@ public class jpaMain {
         tx.begin();
 
         try {
+
+            Team team=new Team();
+            team.setName("teamA");
+            em.persist(team);
+
             Member member =new Member();
             member.setUsername("member1");
             member.setAge(10);
+            member.changeTeam(team);
             em.persist(member);
 
+            //내부 조인, inner 대신 외부조인 (left outer join) 사용 가능
+            //조인된 테이블이기 때문에 Select m 대신에 t도 사용 가능
+            List<Member> resultList1 = em.createQuery("select m from Member m inner join m.team t", Member.class)
+                    .getResultList();
+
+            //세타 조인(막 조인)
+            List<Member> resultList2 = em.createQuery("select m from Member m, Team t where m.username=t.name", Member.class)
+                    .getResultList();
+
+
+
+            /***
             //페이징 예시
             String jpql= "select m from Member m order by m.username desc";
             List<Member> resultList = em.createQuery(jpql, Member.class)
@@ -24,7 +43,7 @@ public class jpaMain {
                     .setMaxResults(20)//20개를 가져온다.
                     .getResultList();
 
-            /***
+
             //new 명령어로 조회(단점은 패키지가 길어지면 아래처럼 다 적어야하는 한계가 있음)
             List<MemberDTO> resultList = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
                     .getResultList();
