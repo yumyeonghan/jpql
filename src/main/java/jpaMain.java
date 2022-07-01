@@ -1,5 +1,6 @@
 import jpql.Member;
 import jpql.MemberDTO;
+import jpql.MemberType;
 import jpql.Team;
 
 import javax.persistence.*;
@@ -22,8 +23,24 @@ public class jpaMain {
             member.setUsername("member1");
             member.setAge(10);
             member.changeTeam(team);
+            member.setType(MemberType.ADMIN);
             em.persist(member);
 
+            //ENUM 을 표현하려면 패키지명부터 다 써야함. 하지만 파라미터 바인딩을 하면 짧게 표현 가능.
+            String query= "select m.username, 'Hello', true From Member m "+
+                          "where m.type=:userType";
+            List<Object[]> result = em.createQuery(query)
+                    .setParameter("userType",MemberType.ADMIN)
+                    .getResultList();
+
+            for (Object[] objects : result) {
+                System.out.println("objects = " + objects[0]);
+                System.out.println("objects = " + objects[1]);
+                System.out.println("objects = " + objects[2]);
+            }
+
+
+            /***
             //내부 조인, inner 대신 외부조인 (left outer join) 사용 가능
             //조인된 테이블이기 때문에 Select m 대신에 t도 사용 가능
             List<Member> resultList1 = em.createQuery("select m from Member m inner join m.team t", Member.class)
@@ -33,9 +50,6 @@ public class jpaMain {
             List<Member> resultList2 = em.createQuery("select m from Member m, Team t where m.username=t.name", Member.class)
                     .getResultList();
 
-
-
-            /***
             //페이징 예시
             String jpql= "select m from Member m order by m.username desc";
             List<Member> resultList = em.createQuery(jpql, Member.class)

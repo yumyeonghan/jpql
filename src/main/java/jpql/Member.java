@@ -14,9 +14,28 @@ public class Member {
     @JoinColumn(name="TEAM_ID")
     private Team team;
 
+    @Enumerated(EnumType.STRING)//항상 enum 타입 쓰려면 문자로 바꿔야함. default 값은 숫자임
+    private MemberType type;
+
     public void changeTeam(Team team){
         this.team=team;
         team.getMembers().add(this);
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public MemberType getType() {
+        return type;
+    }
+
+    public void setType(MemberType type) {
+        this.type = type;
     }
 
     public Long getId() {
