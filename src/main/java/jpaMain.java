@@ -1,4 +1,5 @@
 import jpql.Member;
+import jpql.MemberDTO;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,7 +17,15 @@ public class jpaMain {
             member.setAge(10);
             em.persist(member);
 
-            TypedQuery<Member> query1 = em.createQuery("select m from Member m", Member.class);
+            //new 명령어로 조회(단점은 패키지가 길어지면 아래처럼 다 적어야하는 한계가 있음)
+            List<MemberDTO> resultList = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+                    .getResultList();
+            MemberDTO memberDTO = resultList.get(0);
+            System.out.println("memberDTO = " + memberDTO.getUsername());
+            System.out.println("memberDTO = " + memberDTO.getAge());
+
+            /***
+            TypedQuery<Member> query1 = em.createQuery("select m from Member m", Member.class);//Member.class 는 반환할 타입임
             TypedQuery<String> query2 = em.createQuery("select m.username from Member m", String.class);
             Query query3 = em.createQuery("select m.username, m.age from Member m");//반환 타입이 명확하지 않을때 Query 사용.
 
@@ -33,7 +42,7 @@ public class jpaMain {
             query1.getResultList();
 
             System.out.println("resultList = " + resultList.get(0).getUsername());
-
+             ***/
 
 
 
