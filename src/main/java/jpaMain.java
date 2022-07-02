@@ -26,6 +26,11 @@ public class jpaMain {
             member.setType(MemberType.ADMIN);
             em.persist(member);
 
+            //from 절에서 명시적 조인을 하면 별칭을 얻을수 있다. 이를 이용해 컬렉션 값 연관 경로에서 탐색이 가능하게 한다.
+            String query="select m.username From Team t join t.members m";
+            TypedQuery<Member> query1 = em.createQuery(query, Member.class);
+
+            /***
             //ENUM 을 표현하려면 패키지명부터 다 써야함. 하지만 파라미터 바인딩을 하면 짧게 표현 가능.
             String query= "select m.username, 'Hello', true From Member m "+
                           "where m.type=:userType";
@@ -40,7 +45,7 @@ public class jpaMain {
             }
 
 
-            /***
+
             //내부 조인, inner 대신 외부조인 (left outer join) 사용 가능
             //조인된 테이블이기 때문에 Select m 대신에 t도 사용 가능
             List<Member> resultList1 = em.createQuery("select m from Member m inner join m.team t", Member.class)
