@@ -15,22 +15,67 @@ public class jpaMain {
 
         try {
 
-            Team team=new Team();
-            team.setName("teamA");
-            em.persist(team);
+            Team teamA=new Team();
+            teamA.setName("teamA");
+            em.persist(teamA);
 
-            Member member =new Member();
-            member.setUsername("member1");
-            member.setAge(10);
-            member.changeTeam(team);
-            member.setType(MemberType.ADMIN);
-            em.persist(member);
+            Team teamB=new Team();
+            teamB.setName("teamB");
+            em.persist(teamB);
 
+            Member member1=new Member();
+            member1.setUsername("회원1");
+            member1.setTeam(teamA);
+            em.persist(member1);
+
+            Member member2=new Member();
+            member2.setUsername("회원2");
+            member2.setTeam(teamA);
+            em.persist(member2);
+
+            Member member3=new Member();
+            member3.setUsername("회원3");
+            member3.setTeam(teamB);
+            em.persist(member3);
+
+
+
+
+//            Member member =new Member();
+//            member.setUsername("member1");
+//            member.setAge(10);
+//            member.changeTeam(team);
+//            member.setType(MemberType.ADMIN);
+//            em.persist(member);
+
+
+            //N+1 문제를 해결하기 위해 연관된 엔티티까지 함께 SQL 한번에 뽑는 페치 조인
+            // => 실제 데이터를 한번에 뽑아 저정하므로 반복문시 select 사용 안해도 됨
+            //패치 조인을 사용하지 않으면 그때 그때 쿼리가 날라가는(반복문) 지연 로딩에 의해 많은 양의 쿼리가 날라가므로 성능 이슈가 발생함
+
+            //엔티티 페치 조인
+            List<Member> result = em.createQuery("select m From Member m join fetch m.team", Member.class)
+                    .getResultList();
+
+            //컬렉션 페치 조인
+            //컬렉션 페치 조인은 팀A 입장에선 하난데 데이터는 여러개가(중복으로) 뽑히는(데이터 뻥튀기) 문제가 발생함.
+            ///이 문제를 해결하려면 DISTINCT 를 사용하면 됨.
+            List<Team> result1 = em.createQuery("select distinct t From Team t join t.members", Team.class)
+                    .getResultList();
+
+            for (Member member : result) {
+                System.out.println("member = " + member.getTeam().getName());
+                //회원1은 팀A를 SQL 에서 가져옴
+                //회원2는 팀A를 1차캐시에서 가져옴
+                //회원3는 팀B를 SQL 에서 가져옴
+            }
+
+            /***
             //from 절에서 명시적 조인을 하면 별칭을 얻을수 있다. 이를 이용해 컬렉션 값 연관 경로에서 탐색이 가능하게 한다.
             String query="select m.username From Team t join t.members m";
             TypedQuery<Member> query1 = em.createQuery(query, Member.class);
 
-            /***
+
             //ENUM 을 표현하려면 패키지명부터 다 써야함. 하지만 파라미터 바인딩을 하면 짧게 표현 가능.
             String query= "select m.username, 'Hello', true From Member m "+
                           "where m.type=:userType";
