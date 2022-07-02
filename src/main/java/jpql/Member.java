@@ -3,6 +3,12 @@ package jpql;
 import javax.persistence.*;
 
 @Entity
+// NamedQuery 는 미리 선언해두고 재사용 할 수있다.
+// entity 명. 으로 name 을 쓰는것이 관례
+@NamedQuery(
+        name="Member.findByUsername",
+        query="select m from Member m where m.username=:username"
+)
 public class Member {
 
     @Id @GeneratedValue

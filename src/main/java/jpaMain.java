@@ -44,9 +44,15 @@ public class jpaMain {
 //            Member member =new Member();
 //            member.setUsername("member1");
 //            member.setAge(10);
-//            member.changeTeam(team);
-//            member.setType(MemberType.ADMIN);
+//            member.changeTeam(team); //양방향 값을 넣어주는 함수를 만들어 사용하는것이 좋음
+//            member.setType(MemberType.ADMIN);//enum 타입 값 넣기
 //            em.persist(member);
+
+
+            //NamedQuery 사용
+            List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
+                    .setParameter("username", "회원1")
+                    .getResultList();
 
 
             //N+1 문제를 해결하기 위해 연관된 엔티티까지 함께 SQL 한번에 뽑는 페치 조인
