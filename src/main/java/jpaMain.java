@@ -48,6 +48,15 @@ public class jpaMain {
 //            member.setType(MemberType.ADMIN);//enum 타입 값 넣기
 //            em.persist(member);
 
+            //벌크연산
+            //반환값은 멤버(객체)수
+            int resultCount = em.createQuery("update Member m set m.age=20")
+                    .executeUpdate();
+
+            //벌크 연산시 영속성 컨텍스트에는 age 가 20으로 반영이 안돼있다. 그래서 벌크연산 후 영속성 컨텍스트를 초기화 해줘야한다.
+            //초기화 방법은 em.clear 로 영속성 컨텍스트를 비워주고 em.find 를 하면 영속성 컨텍스트는 비어있으니깐 db 에서 값 가져온다.
+            em.clear();
+            Member findMember = em.find(Member.class, member1.getId());
 
             //NamedQuery 사용
             List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
